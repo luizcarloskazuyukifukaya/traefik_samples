@@ -1,10 +1,8 @@
 # traefik.yml
 log:
   level: DEBUG
-
 api:
   insecure: true  # Enable the API and dashboard
-
 entryPoints:
   web:
     address: ":80"
@@ -12,11 +10,9 @@ entryPoints:
     address: ":443"
   traefik:
     address: ":8080"
-
 providers:
   docker:
     exposedByDefault: false
-
 certificatesResolvers:
   myresolver:
     acme:

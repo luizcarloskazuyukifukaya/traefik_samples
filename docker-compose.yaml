@@ -1,11 +1,22 @@
 version: "3.3"
 
 services:
+
   traefik:
     image: "traefik:v3.3"
     container_name: "traefik"
     command:
-      - "--configFile=/config/traefik.yml"  # Point to the static configuration file
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=duckdns"
+      - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.email=luizcarloskazuyukifukaya@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"
       - "443:443"
@@ -13,15 +24,23 @@ services:
     environment:
       - DUCKDNS_TOKEN=48a51d62-bc0f-4ad5-995e-a526d53b0126
     volumes:
-      - ./traefik.yml:/config/traefik.yml # Mount the static configuration file
       - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
   whoami:
     image: "traefik/whoami"
-    container_name: "simple-service-amksys"
+    container_name: "simple-service"
+  nginx:
+    image: nginx:latest
+    container_name: "nginx"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`amksys.duckdns.org`)"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.services.whoami.loadbalancer.server.port=80"
-
+      - "traefik.http.routers.nginx.rule=Host(`amksys.duckdns.org`)"
+      - "traefik.http.routers.nginx.entrypoints=websecure"
+        # THIS IS REQUIRED TO GET TRAFIC ROUTER
+      - "traefik.http.routers.nginx.tls.certresolver=myresolver"
+        #    ports:
+        #- "8081:80"
+    volumes:
+      - ./content:/usr/share/nginx/html
+    restart: unless-stopped
