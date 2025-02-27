@@ -1,0 +1,33 @@
+log:
+  #level: INFO  # Change to INFO for production
+  level: DEBUG  # Change to INFO for production
+api:
+  dashboard: true
+  #insecure: false  # Secure the dashboard in production
+  insecure: true  # Secure the dashboard in production
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+  traefik:
+    address: ":8080"
+providers:
+  docker:
+    exposedByDefault: false
+certificatesResolvers:
+  myresolver: 
+  # This name, "myresolver", should match to
+  #  traefik.http.router.<service-name>.tls.certresolver=<this name HERE>
+  # in docker-compose.yaml file
+    acme:
+      email: "luizcarloskazuyukifukaya@gmail.com"
+      storage: "/letsencrypt/acme.json"
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      #caServer: "https://acme-v02.api.letsencrypt.org/directory"  # Production server
+      dnsChallenge:
+        provider: "duckdns"
+        resolvers:
+          - "1.1.1.1:53"
+          - "8.8.8.8:53"
+

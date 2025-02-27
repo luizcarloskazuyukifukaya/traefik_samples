@@ -1,2 +1,1 @@
-./letsencrypt/acme.json
-./dockdns_token.txt
+**/dockdns_token.txt

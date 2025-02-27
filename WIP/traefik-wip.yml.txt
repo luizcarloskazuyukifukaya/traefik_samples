@@ -19,14 +19,15 @@ certificatesResolvers:
   myresolver:
     acme:
       email: "luizcarloskazuyukifukaya@gmail.com"
-      # email: '{{ env "ACME_EMAIL" }}'   
-      # email: "{{ env 'ACME_EMAIL' }}"
-      # email: ${ACME_EMAIL}
       storage: "/letsencrypt/acme.json"
-      caServer: "https://acme-v02.api.letsencrypt.org/directory"  # Production server
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      #caServer: "https://acme-v02.api.letsencrypt.org/directory"  # Production server
       dnsChallenge:
         provider: "duckdns"
+        disablePropagtionCheck: true
+        delayBeforeCheck: 60
         resolvers:
-          - "1.1.1.1"
-          - "8.8.8.8"
+          - "1.1.1.1:53"
+          - "8.8.8.8:53"
+        envFile: "/run/secrets/duckdns_token"
 

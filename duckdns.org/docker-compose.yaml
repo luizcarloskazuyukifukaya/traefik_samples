@@ -1,0 +1,65 @@
+version: "3.8"  # Use the latest version
+
+services:
+  traefik:
+    image: "traefik" # latest
+    #image: "traefik:v3.3"
+    container_name: "traefik"
+    command:
+      - "--configFile=/config/traefik.yml"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    environment:
+      - DUCKDNS_TOKEN_FILE=/run/secrets/duckdns_token
+    volumes:
+      - ./traefik.yml:/config/traefik.yml
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    secrets:
+      - duckdns_token
+    networks:
+      - traefik_network
+
+  whoami:
+    image: "traefik/whoami"
+    container_name: "whoami-service"
+    labels:
+      - "traefik.enable=true"
+        # The FQDN to be specified here for this container for routing traffic
+      - "traefik.http.routers.whoami-service.rule=Host(`luizcarloskazuyukifukaya.duckdns.org`)"
+      - "traefik.http.routers.whoami-service.entrypoints=websecure"
+        # "myresolver" defined in the traefik.yml
+      - "traefik.http.routers.whoami-service.tls.certresolver=myresolver"
+    networks:
+      - traefik_network
+
+  nginx:
+    image: nginx:latest
+    container_name: "nginx-service" 
+    # [Best Practices] Container_name to match the router name like the following:
+    # traefik.http.routers.<container_name:as a best practice>.*
+    labels:
+      - "traefik.enable=true"
+        # The FQDN to be specified here for this container for routing traffic
+      - "traefik.http.routers.nginx-service.rule=Host(`amksys.duckdns.org`)"
+      - "traefik.http.routers.nginx-service.entrypoints=websecure"
+        # "myresolver" defined in the traefik.yml
+      - "traefik.http.routers.nginx-service.tls.certresolver=myresolver"
+    volumes:
+      - ./content:/usr/share/nginx/html
+    restart: unless-stopped
+    networks:
+      - traefik_network
+
+# Internal Network to be common among all containers
+networks:
+  traefik_network:
+    name: traefik_network
+
+# Secret definition for DuckDNS.org used in the DNS Challenge
+secrets:
+  duckdns_token:
+    file: ./duckdns_token.txt
+
