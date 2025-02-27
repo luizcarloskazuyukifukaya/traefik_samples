@@ -1,0 +1,16 @@
+version: "3.3"
+
+services:
+  whoami:
+    image: "traefik/whoami"
+    container_name: "whoami"
+    ports:
+      - "80:80"
+  nginx:
+    image: nginx:latest
+    container_name: "nginx"
+    ports:
+      - "8080:80"
+    volumes:
+      - ./content:/usr/share/nginx/html
+    restart: unless-stopped

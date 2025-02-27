@@ -1,0 +1,27 @@
+version: "3.3"
+
+services:
+  traefik:
+    image: "traefik:v3.3"
+    container_name: "traefik"
+    command:
+      - "--configFile=/config/traefik.yml"  # Point to the static configuration file
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    environment:
+      - DUCKDNS_TOKEN=48a51d62-bc0f-4ad5-995e-a526d53b0126
+    volumes:
+      - ./traefik.yml:/config/traefik.yml # Mount the static configuration file
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+  whoami:
+    image: "traefik/whoami"
+    container_name: "simple-service-amksys"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`amksys.duckdns.org`)"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.services.whoami.loadbalancer.server.port=80"
+

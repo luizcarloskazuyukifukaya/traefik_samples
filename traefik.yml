@@ -1,0 +1,32 @@
+# traefik.yml
+log:
+  level: DEBUG
+
+api:
+  insecure: true  # Enable the API and dashboard
+
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+  traefik:
+    address: ":8080"
+
+providers:
+  docker:
+    exposedByDefault: false
+
+certificatesResolvers:
+  myresolver:
+    acme:
+      email: "luizcarloskazuyukifukaya@gmail.com"
+      storage: "/letsencrypt/acme.json"
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      dnsChallenge:
+        provider: "duckdns"
+        #        propagationTimeout: 60s
+        resolvers:
+          - "1.1.1.1"
+          - "8.8.8.8"
+
