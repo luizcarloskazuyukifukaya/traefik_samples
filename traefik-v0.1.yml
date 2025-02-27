@@ -1,13 +1,17 @@
+# traefik.yml
 log:
-  #level: INFO  # Change to INFO for production
-  level: DEBUG  # Change to INFO for production
+  level: DEBUG
 api:
   dashboard: true
-  #insecure: false  # Secure the dashboard in production
-  insecure: true  # Secure the dashboard in production
+  insecure: true  # Enable the API and dashboard
 entryPoints:
   web:
     address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
   websecure:
     address: ":443"
   traefik:
@@ -19,13 +23,11 @@ certificatesResolvers:
   myresolver:
     acme:
       email: "luizcarloskazuyukifukaya@gmail.com"
-      # email: '{{ env "ACME_EMAIL" }}'   
-      # email: "{{ env 'ACME_EMAIL' }}"
-      # email: ${ACME_EMAIL}
       storage: "/letsencrypt/acme.json"
-      caServer: "https://acme-v02.api.letsencrypt.org/directory"  # Production server
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
       dnsChallenge:
         provider: "duckdns"
+        #        propagationTimeout: 60s
         resolvers:
           - "1.1.1.1"
           - "8.8.8.8"

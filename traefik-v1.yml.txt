@@ -3,11 +3,15 @@ log:
   level: DEBUG  # Change to INFO for production
 api:
   dashboard: true
-  #insecure: false  # Secure the dashboard in production
-  insecure: true  # Secure the dashboard in production
+  insecure: false  # Secure the dashboard in production
 entryPoints:
   web:
     address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
   websecure:
     address: ":443"
   traefik:
