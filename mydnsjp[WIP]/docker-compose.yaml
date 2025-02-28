@@ -1,27 +1,76 @@
+version: "3.8"  # Use the latest version
+
 services:
   traefik:
-    image: traefik:3.1.0
-    container_name: rp-traefik
-    restart: always
-    networks:
-      - reverse-proxy
+    image: "traefik" # latest
+    #image: "traefik:v3.3"
+    container_name: "traefik"
+    command:
+      - "--configFile=/config/traefik.yml"
     ports:
-      - 80:80
-      - 443:443
-      - 8080:8080
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.traefik-reverse-proxy.tls=true
-      - traefik.http.routers.traefik-reverse-proxy.tls.certresolver=mydnsjp
-      - traefik.http.routers.traefik-reverse-proxy.tls.domains[0].main=*.<domain-name>
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=myresolver"
+      #- "traefik.http.routers.traefik.tls.domains[0].main=*.<domain-name>"
+      #- "traefik.http.routers.traefik.tls.domains[0].main=*.amksys.mydns.bz"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.amksys.mydns.bz`)"
     environment:
-      - MYDNSJP_MASTER_ID=<mydnsjp-master-id>
-      - MYDNSJP_PASSWORD=<mydnsjp-password>
+      - MYDNSJP_MASTER_ID_FILE=/run/secrets/mydnsjp_master_id
+      - MYDNSJP_PASSWORD_FILE=/run/secrets/mydnsjp_password
     volumes:
-      - ./traefik/volume/etc/traefik:/etc/traefik
-      - ${XDG_RUNTIME_DIR}/docker.sock:/var/run/docker.sock:ro
-      - /usr/share/zoneinfo/Asia/Tokyo:/etc/localtime:ro
+      - ./traefik.yml:/config/traefik.yml
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    secrets:
+      - mydnsjp_master_id
+      - mydnsjp_password
+    networks:
+      - traefik_network
 
+  whoami:
+    image: "traefik/whoami"
+    container_name: "whoami-service"
+    labels:
+      - "traefik.enable=true"
+        # The FQDN to be specified here for this container for routing traffic
+      - "traefik.http.routers.whoami-service.rule=Host(`whoami.amksys.mydns.bz`)"
+      - "traefik.http.routers.whoami-service.entrypoints=websecure"
+        # "myresolver" defined in the traefik.yml
+      - "traefik.http.routers.whoami-service.tls.certresolver=myresolver"
+    networks:
+      - traefik_network
+
+  nginx:
+    image: nginx:latest
+    container_name: "nginx-service" 
+    # [Best Practices] Container_name to match the router name like the following:
+    # traefik.http.routers.<container_name:as a best practice>.*
+    labels:
+      - "traefik.enable=true"
+        # The FQDN to be specified here for this container for routing traffic
+      - "traefik.http.routers.nginx-service.rule=Host(`nginx.amksys.mydns.bz`)"
+      - "traefik.http.routers.nginx-service.entrypoints=websecure"
+        # "myresolver" defined in the traefik.yml
+      - "traefik.http.routers.nginx-service.tls.certresolver=myresolver"
+    volumes:
+      - ./content:/usr/share/nginx/html
+    restart: unless-stopped
+    networks:
+      - traefik_network
+
+# Internal Network to be common among all containers
 networks:
-  reverse-proxy:
-    name: reverse-proxy
+  traefik_network:
+    name: traefik_network
+
+# Secret definition for MyDNS.jp used in the DNS Challenge
+secrets:
+  mydnsjp_master_id:
+    file: ./secrets/mydnsjp_master_id.secret
+  mydnsjp_password:
+    file: ./secrets/mydnsjp_password.secret
+
