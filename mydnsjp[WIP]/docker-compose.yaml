@@ -1,0 +1,27 @@
+services:
+  traefik:
+    image: traefik:3.1.0
+    container_name: rp-traefik
+    restart: always
+    networks:
+      - reverse-proxy
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.traefik-reverse-proxy.tls=true
+      - traefik.http.routers.traefik-reverse-proxy.tls.certresolver=mydnsjp
+      - traefik.http.routers.traefik-reverse-proxy.tls.domains[0].main=*.<domain-name>
+    environment:
+      - MYDNSJP_MASTER_ID=<mydnsjp-master-id>
+      - MYDNSJP_PASSWORD=<mydnsjp-password>
+    volumes:
+      - ./traefik/volume/etc/traefik:/etc/traefik
+      - ${XDG_RUNTIME_DIR}/docker.sock:/var/run/docker.sock:ro
+      - /usr/share/zoneinfo/Asia/Tokyo:/etc/localtime:ro
+
+networks:
+  reverse-proxy:
+    name: reverse-proxy

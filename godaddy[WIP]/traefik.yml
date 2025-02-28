@@ -23,10 +23,10 @@ certificatesResolvers:
     acme:
       email: "luizcarloskazuyukifukaya@gmail.com"
       storage: "/letsencrypt/acme.json"
-      #caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
-      caServer: "https://acme-v02.api.letsencrypt.org/directory"  # Production server
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      #caServer: "https://acme-v02.api.letsencrypt.org/directory"  # Production server
       dnsChallenge:
-        provider: "duckdns"
+        provider: "godaddy"
         resolvers:
           - "1.1.1.1:53"
           - "8.8.8.8:53"

@@ -12,13 +12,15 @@ services:
       - "443:443"
       - "8080:8080"
     environment:
-      - DUCKDNS_TOKEN_FILE=/run/secrets/duckdns_token
+      - GODADDY_API_KEY_FILE=/run/secrets/godaddy_api_key
+      - GODADDY_API_SECRET_FILE=/run/secrets/godaddy_api_secret_key 
     volumes:
       - ./traefik.yml:/config/traefik.yml
       - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     secrets:
-      - duckdns_token
+      - godaddy_api_key
+      - godaddy_api_secret_key
     networks:
       - traefik_network
 
@@ -28,7 +30,7 @@ services:
     labels:
       - "traefik.enable=true"
         # The FQDN to be specified here for this container for routing traffic
-      - "traefik.http.routers.whoami-service.rule=Host(`luizcarloskazuyukifukaya.duckdns.org`)"
+      - "traefik.http.routers.whoami-service.rule=Host(`whoami.aiplatform.amksys.xyz`)"
       - "traefik.http.routers.whoami-service.entrypoints=websecure"
         # "myresolver" defined in the traefik.yml
       - "traefik.http.routers.whoami-service.tls.certresolver=myresolver"
@@ -43,7 +45,7 @@ services:
     labels:
       - "traefik.enable=true"
         # The FQDN to be specified here for this container for routing traffic
-      - "traefik.http.routers.nginx-service.rule=Host(`amksys.duckdns.org`)"
+      - "traefik.http.routers.nginx-service.rule=Host(`nginx.aiplatform.amksys.xyz`)"
       - "traefik.http.routers.nginx-service.entrypoints=websecure"
         # "myresolver" defined in the traefik.yml
       - "traefik.http.routers.nginx-service.tls.certresolver=myresolver"
@@ -58,8 +60,10 @@ networks:
   traefik_network:
     name: traefik_network
 
-# Secret definition for DuckDNS.org used in the DNS Challenge
+# Secret definition for Go Daddy used in the DNS Challenge
 secrets:
-  duckdns_token:
-    file: ./secrets/duckdns_token.secret
+  godaddy_api_key:
+    file: ./secrets/godaddy_api_key.secret
+  godaddy_api_secret_key:
+    file: ./secrets/godaddy_api_secret_key.secret
 

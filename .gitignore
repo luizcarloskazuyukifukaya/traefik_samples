@@ -1,1 +1,4 @@
-**/duckdns_token.txt
+**/*.secret
+**/*.secret.production
+**/*.secret.staging
+**/acme.json
