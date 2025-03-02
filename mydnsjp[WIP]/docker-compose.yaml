@@ -2,8 +2,8 @@ version: "3.8"  # Use the latest version
 
 services:
   traefik:
-    image: "traefik" # latest
-    #image: "traefik:v3.3"
+    #image: "traefik" # latest
+    image: traefik:3.1.0
     container_name: "traefik"
     command:
       - "--configFile=/config/traefik.yml"
@@ -19,8 +19,10 @@ services:
       #- "traefik.http.routers.traefik.tls.domains[0].main=*.amksys.mydns.bz"
       - "traefik.http.routers.traefik.rule=Host(`traefik.amksys.mydns.bz`)"
     environment:
-      - MYDNSJP_MASTER_ID_FILE=/run/secrets/mydnsjp_master_id
-      - MYDNSJP_PASSWORD_FILE=/run/secrets/mydnsjp_password
+      #- MYDNSJP_MASTER_ID_FILE=/run/secrets/mydnsjp_master_id
+      #- MYDNSJP_PASSWORD_FILE=/run/secrets/mydnsjp_password
+      - MYDNSJP_MASTER_ID=mydns151516
+      - MYDNSJP_PASSWORD=8aXS29m8AXF
     volumes:
       - ./traefik.yml:/config/traefik.yml
       - "./letsencrypt:/letsencrypt"
@@ -41,6 +43,10 @@ services:
       - "traefik.http.routers.whoami-service.entrypoints=websecure"
         # "myresolver" defined in the traefik.yml
       - "traefik.http.routers.whoami-service.tls.certresolver=myresolver"
+        # WHEN THE CONTAINER PORT HAS TO BE SPECIFIED
+        # The acces to the traefik is via the exposed port (websecure),
+        # BUT the access to the container is via the port specified bellow.
+        #- "traefik.http.services.whoami-service.loadbalancer.server.port=2342"
     networks:
       - traefik_network
 

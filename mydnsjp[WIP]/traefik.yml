@@ -20,6 +20,7 @@ entryPoints:
 providers:
   docker:
     exposedByDefault: false
+    network: traefik_network
 
 certificatesResolvers:
   myresolver: 
@@ -34,6 +35,9 @@ certificatesResolvers:
       dnsChallenge: # DNS Challenge method used
         provider: "mydnsjp" # Need to specify the provider HERE!!
         resolvers:
+          - "210.197.74.200:53"
+          - "210.197.74.201:53"
+          - "210.197.74.202:53"
           - "1.1.1.1:53"
           - "8.8.8.8:53"
 
